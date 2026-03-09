@@ -1,234 +1,693 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="en">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Virasat Chai | A Vintage Ritual</title>
-    <!-- Fonts -->
+    <title>Virasat Chai &mdash; Heritage Tea Experience</title>
+    <meta name="description" content="Purveyors of heritage chai. Artisanal blends from Assam, Darjeeling & Kashmir — stone-ground spices, zero additives.">
+    <!-- DNS prefetch for CDNs -->
+    <link rel="dns-prefetch" href="https://cdnjs.cloudflare.com">
+    <link rel="dns-prefetch" href="https://unpkg.com">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link
-        href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Manrope:wght@300;400;500;600;700&display=swap"
-        rel="stylesheet">
+    <!-- Preload critical hero image -->
+    <link rel="preload" as="image" href="assets/premium_kadak_chai_1772872092619.jpg" fetchpriority="high">
+    <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Manrope:wght@300;400;500;600;700;800&family=DM+Mono:wght@300;400;500&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="animations.css">
 </head>
+<body>
 
-<body class="loading">
-    <nav class="navbar">
-        <div class="nav-brand">virasat.</div>
-        <div class="nav-links">
-            <a href="#story">Heritage</a>
-            <a href="#collection">Reserve</a>
-            <a href="#craft">Artisan Craft</a>
+<!-- PRELOADER -->
+<div class="preloader" id="preloader">
+    <div class="preloader-inner">
+        <div class="preloader-brand">virasat.</div>
+        <div class="preloader-bar"><div class="preloader-fill"></div></div>
+        <p class="preloader-text">Brewing your experience<span class="preloader-dots"></span></p>
+    </div>
+</div>
+
+<!-- GLOBAL OVERLAYS -->
+<div class="grain-overlay" aria-hidden="true"></div>
+<canvas id="particles" aria-hidden="true"></canvas>
+<div class="cursor-dot" aria-hidden="true"></div>
+<div class="cursor-ring" aria-hidden="true"></div>
+<div class="cursor-text" aria-hidden="true">View</div>
+
+<!-- SCROLL PROGRESS -->
+<div class="scroll-progress"></div>
+
+<!-- SIDE NAV DOTS -->
+<nav class="side-nav" aria-label="Page sections">
+    <button class="side-dot active" data-target="hero"><span>Home</span></button>
+    <button class="side-dot" data-target="cinematic"><span>Reel</span></button>
+    <button class="side-dot" data-target="about"><span>About</span></button>
+    <button class="side-dot" data-target="process"><span>Process</span></button>
+    <button class="side-dot" data-target="gallery"><span>Gallery</span></button>
+    <button class="side-dot" data-target="shop"><span>Shop</span></button>
+    <button class="side-dot" data-target="ingredients"><span>Ingredients</span></button>
+    <button class="side-dot" data-target="testimonials"><span>Reviews</span></button>
+    <button class="side-dot" data-target="faq"><span>FAQ</span></button>
+    <button class="side-dot" data-target="contact"><span>Contact</span></button>
+</nav>
+
+<!-- CART DRAWER -->
+<div class="cart-overlay" id="cartOverlay"></div>
+<aside class="cart-drawer" id="cartDrawer">
+    <div class="cart-header">
+        <h3>Your Cart</h3>
+        <button class="cart-close" id="cartClose">&times;</button>
+    </div>
+    <div class="cart-items" id="cartItems">
+        <div class="cart-empty">
+            <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/></svg>
+            <p>Your cart is empty</p>
+            <span>Add some heritage chai to get started</span>
         </div>
-        <div class="nav-actions">
-            <a href="#collection" class="btn-text">Purveyors</a>
-            <button class="menu-toggle">
-                <span></span>
-                <span></span>
-            </button>
-        </div>
-    </nav>
-    <div class="mobile-menu nav-overlay">
-        <button class="mobile-close" aria-label="Close menu">&times;</button>
-        <div class="nav-overlay-grid">
-            <div class="nav-overlay-left">
-                <p class="eyebrow overlay-eyebrow">The Virasat Chronicle</p>
-                <div class="nav-overlay-media interactive-img">
-                    <img src="assets/vintage_tea_leaves_1772872107280.png" alt="Tea Culture">
-                </div>
-                <div class="nav-overlay-info">
-                    <p style="margin-bottom: 2rem;">Authentic 2-minute kadak chai.<br>Honoring traditional rituals.</p>
-                    <div class="socials" style="margin-top: 2rem;">
-                        <a href="#">Instagram</a>
-                        <a href="#">Journal</a>
-                    </div>
-                </div>
+    </div>
+    <div class="cart-footer" id="cartFooter" style="display:none;">
+        <div class="cart-total"><span>Total</span><span id="cartTotal">&#x20B9;0</span></div>
+        <button class="btn-checkout magnetic-btn">Proceed to Checkout</button>
+    </div>
+</aside>
+
+<!-- QUICK VIEW MODAL -->
+<div class="modal-overlay" id="quickViewOverlay"></div>
+<div class="quick-view-modal" id="quickViewModal">
+    <button class="modal-close" id="modalClose">&times;</button>
+    <div class="modal-grid">
+        <div class="modal-image"><img id="modalImg" src="" alt=""></div>
+        <div class="modal-info">
+            <p class="eyebrow" id="modalTag">Limited Edition</p>
+            <h2 id="modalTitle"></h2>
+            <p class="modal-desc" id="modalDesc"></p>
+            <div class="modal-details">
+                <div class="detail-item"><span class="detail-label">Origin</span><span id="modalOrigin"></span></div>
+                <div class="detail-item"><span class="detail-label">Strength</span><div class="strength-bar"><div class="strength-fill" id="modalStrength"></div></div></div>
+                <div class="detail-item"><span class="detail-label">Brew Time</span><span id="modalBrew"></span></div>
+                <div class="detail-item"><span class="detail-label">Temperature</span><span id="modalTemp"></span></div>
             </div>
-            <div class="nav-overlay-right mobile-links-container">
-                <a href="#story" class="mobile-link"><span>01</span> Heritage</a>
-                <a href="#collection" class="mobile-link"><span>02</span> Reserve</a>
-                <a href="#craft" class="mobile-link"><span>03</span> Artisan Craft</a>
-                <a href="#collection" class="mobile-link shop-link"
-                    style="margin-top:2rem; font-size:clamp(1.2rem, 3vw, 1.8rem); border-bottom:1px solid currentColor;">
-                    Explore Reserve &rarr;
-                </a>
+            <div class="modal-actions">
+                <div class="qty-selector">
+                    <button class="qty-btn qty-minus">&minus;</button>
+                    <span class="qty-value">1</span>
+                    <button class="qty-btn qty-plus">+</button>
+                </div>
+                <button class="btn-add-modal magnetic-btn" id="modalAddCart">Add to Cart &mdash; <span id="modalPrice"></span></button>
             </div>
         </div>
     </div>
+</div>
 
-    <!-- Custom Cursor Effect -->
-    <div class="cursor-dot"></div>
-    <div class="cursor-ring"></div>
-
-    <main data-scroll-container>
-        <!-- Hero -->
-        <section class="sec-hero">
-            <div class="hero-content">
-                <p class="eyebrow">Est. Since Forever in Tradition</p>
-                <h1 class="hero-title">
-                    <span class="line-wrap"><span class="line">An <span class="italic">archival</span>
-                            approach</span></span>
-                    <span class="line-wrap"><span class="line">to modern tea.</span></span>
-                </h1>
-                <p class="hero-desc">Discover the uncompromised essence of kadak chai. Small-batch selections honoring
-                    the deep-rooted rituals of India, curated for the refined palate.</p>
-                <div style="display:flex; gap: 1.5rem; margin-top: 3rem;">
-                    <a href="#collection" class="btn-primary">View Reserve</a>
-                    <a href="#story" class="btn-secondary">The Heritage</a>
-                </div>
-            </div>
-            </div>
-            <div class="hero-image interactive-img">
-                <img src="assets/premium_kadak_chai_1772872092619.png" alt="Pouring Chai in vintage setting">
-            </div>
-        </section>
-
-        <!-- Marquee -->
-        <section class="marquee">
-            <div class="marquee-content">
-                ARTISANAL BLENDS &bull; HERITAGE RECIPES &bull; KASHMIRI SAFFRON &bull; ASSAM BLACK TEA &bull; NO
-                ARTIFICIAL ADDITIVES &bull;
-                ARTISANAL BLENDS &bull; HERITAGE RECIPES &bull; KASHMIRI SAFFRON &bull; ASSAM BLACK TEA &bull; NO
-                ARTIFICIAL ADDITIVES &bull;
-            </div>
-        </section>
-
-        <!-- Philosophy -->
-        <section id="story" class="sec-philosophy">
-            <div class="phil-container">
-                <div class="phil-text">
-                    <p class="eyebrow">The Manifesto</p>
-                    <h2 class="phil-heading">Rooted in history, <br><span class="italic">steeped in culture.</span></h2>
-                    <p class="phil-body">Virasat translates to heritage. We exist as custodians of the authentic
-                        <i>kadak</i> brew. Refusing commercial shortcuts, we source exclusively from heritage estates to
-                        preserve the rich, robust flavor profiles that defined an era.
-                    </p>
-                    <a href="#" class="btn-text" style="display:inline-block; margin-top:2rem;">Read the Archive</a>
-                </div>
-                <div class="phil-image interactive-img">
-                    <img src="assets/vintage_tea_leaves_1772872107280.png" alt="Vintage tea leaves">
-                </div>
-            </div>
-        </section>
-
-        <!-- Taste Profile Banner -->
-        <section class="sec-taste-profile">
-            <h2>The Golden Standard.</h2>
-            <p>Our blends undergo rigorous tasting to ensure a balanced extraction of tannins, malty sweetness, and
-                aromatic spice.</p>
-        </section>
-
-        <!-- Collection -->
-        <section id="collection" class="sec-collection">
-            <div class="col-header">
-                <p class="eyebrow">The Virasat Reserve</p>
-                <h2 class="col-title">Curations</h2>
-            </div>
-            <div class="product-grid">
-                <!-- Product 1 -->
-                <article class="product-item interactive-card">
-                    <div class="product-image-wrapper">
-                        <img src="assets/premium_kadak_chai_1772872092619.png" alt="Raw Kadak Shot">
-                    </div>
-                    <div class="product-info">
-                        <h3>No. 01 / Original Kadak</h3>
-                        <p>The unfiltered classic. A remarkably bold brew commanding attention with prominent malty
-                            notes.</p>
-                        <div class="product-meta">
-                            <span>₹499 &mdash; 200g Reserve Box</span>
-                            <button class="add-to-cart">+</button>
-                        </div>
-                    </div>
-                </article>
-                <!-- Product 2 -->
-                <article class="product-item interactive-card">
-                    <div class="product-image-wrapper">
-                        <img src="assets/saffron_spices_1772872120851.png" alt="Spiced Masala">
-                    </div>
-                    <div class="product-info">
-                        <h3>No. 02 / Spiced Botanicals</h3>
-                        <p>An intricate melange of crushed cardamom, clove, and dried ginger sourced from the Malabar
-                            coast.</p>
-                        <div class="product-meta">
-                            <span>₹549 &mdash; 200g Reserve Box</span>
-                            <button class="add-to-cart">+</button>
-                        </div>
-                    </div>
-                </article>
-            </div>
-        </section>
-
-        <!-- Craft -->
-        <section id="craft" class="sec-craft">
-            <div class="craft-img-large interactive-img">
-                <img src="assets/saffron_spices_1772872120851.png" alt="Spices">
-            </div>
-            <div class="craft-content">
-                <h2>The purest botanicals, <br><span class="italic">carefully selected.</span></h2>
-                <div class="ingredients-list">
-                    <div class="ing-item">
-                        <span class="ing-num">01</span>
-                        <h4>Kashmiri Saffron</h4>
-                        <p>Sourced from elevated terrains for a delicate, premium golden hue and subtle floral
-                            undertones.</p>
-                    </div>
-                    <div class="ing-item">
-                        <span class="ing-num">02</span>
-                        <h4>Assam Orthodox</h4>
-                        <p>A robust, full-bodied black tea base cultivated in the region's most historic estates.</p>
-                    </div>
-                    <div class="ing-item">
-                        <span class="ing-num">03</span>
-                        <h4>Malabar Cardamom</h4>
-                        <p>Intensely aromatic green pods offering a natural, camphor-like sweetness to balance the
-                            boldness.</p>
-                    </div>
-                </div>
-            </div>
-        </section>
-    </main>
-
-    <footer class="sec-footer">
-        <div class="footer-top">
-            <div class="footer-brand-huge">virasat.</div>
+<!-- NAVBAR -->
+<header class="navbar navbar-hidden" id="navbar">
+    <button class="nav-menu-toggle magnetic-btn" id="navMenuToggle" aria-label="Toggle menu">
+        <span></span><span></span><span></span>
+    </button>
+    <div class="nav-right">
+        <button class="cart-btn magnetic-btn" id="cartBtn" aria-label="Cart">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 0 1-8 0"/></svg>
+            <span class="cart-count" id="cartCount">0</span>
+        </button>
+    </div>
+</header>
+<nav class="nav-sidebar" id="navSidebar">
+    <div class="nav-sidebar-inner">
+        <a href="#hero" class="nav-brand magnetic-btn">virasat.</a>
+        <div class="nav-sidebar-links">
+            <a href="#about" class="nav-link magnetic-btn">Heritage</a>
+            <a href="#process" class="nav-link magnetic-btn">Process</a>
+            <a href="#shop" class="nav-link magnetic-btn">Shop</a>
+            <a href="#ingredients" class="nav-link magnetic-btn">Ingredients</a>
+            <a href="#testimonials" class="nav-link magnetic-btn">Reviews</a>
+            <a href="#contact" class="nav-link magnetic-btn">Contact</a>
         </div>
-        <div class="footer-main">
-            <div class="footer-col">
-                <h4>The Ledger</h4>
-                <p>Join our registry for archival releases, tasting notes, and private event invitations.</p>
-                <form class="newsletter-form">
-                    <input type="email" placeholder="Enter correspondence address">
-                    <button type="submit" aria-label="Submit">&rarr;</button>
+    </div>
+</nav>
+<div class="nav-sidebar-overlay" id="navSidebarOverlay"></div>
+
+<!-- KINETIC VIRASAT BACKGROUND (full-page, behind all content) -->
+<div class="kinetic-bg" aria-hidden="true">
+    <div class="kinetic-row" data-direction="1"><span>VIRASAT</span><span>VIRASAT</span><span>VIRASAT</span><span>VIRASAT</span><span>VIRASAT</span><span>VIRASAT</span><span>VIRASAT</span><span>VIRASAT</span></div>
+    <div class="kinetic-row" data-direction="-1"><span>VIRASAT</span><span>VIRASAT</span><span>VIRASAT</span><span>VIRASAT</span><span>VIRASAT</span><span>VIRASAT</span><span>VIRASAT</span><span>VIRASAT</span></div>
+    <div class="kinetic-row" data-direction="1"><span>VIRASAT</span><span>VIRASAT</span><span>VIRASAT</span><span>VIRASAT</span><span>VIRASAT</span><span>VIRASAT</span><span>VIRASAT</span><span>VIRASAT</span></div>
+    <div class="kinetic-row" data-direction="-1"><span>VIRASAT</span><span>VIRASAT</span><span>VIRASAT</span><span>VIRASAT</span><span>VIRASAT</span><span>VIRASAT</span><span>VIRASAT</span><span>VIRASAT</span></div>
+    <div class="kinetic-row" data-direction="1"><span>VIRASAT</span><span>VIRASAT</span><span>VIRASAT</span><span>VIRASAT</span><span>VIRASAT</span><span>VIRASAT</span><span>VIRASAT</span><span>VIRASAT</span></div>
+    <div class="kinetic-row" data-direction="-1"><span>VIRASAT</span><span>VIRASAT</span><span>VIRASAT</span><span>VIRASAT</span><span>VIRASAT</span><span>VIRASAT</span><span>VIRASAT</span><span>VIRASAT</span></div>
+    <div class="kinetic-row" data-direction="1"><span>VIRASAT</span><span>VIRASAT</span><span>VIRASAT</span><span>VIRASAT</span><span>VIRASAT</span><span>VIRASAT</span><span>VIRASAT</span><span>VIRASAT</span></div>
+    <div class="kinetic-row" data-direction="-1"><span>VIRASAT</span><span>VIRASAT</span><span>VIRASAT</span><span>VIRASAT</span><span>VIRASAT</span><span>VIRASAT</span><span>VIRASAT</span><span>VIRASAT</span></div>
+</div>
+
+<main>
+
+<!-- 1. HERO -->
+<section class="sec-hero" id="hero">
+    <div class="hero-bg">
+        <img src="assets/premium_kadak_chai_1772872092619.jpg" alt="Virasat Chai hero" class="hero-bg-img" fetchpriority="high">
+        <div class="hero-bg-overlay"></div>
+    </div>
+    <div class="hero-content">
+        <p class="eyebrow anim-up">Est. Since Forever in Tradition</p>
+        <div class="hero-actions anim-up">
+            <a href="#shop" class="btn-primary magnetic-btn"><span>Explore Collection</span></a>
+            <a href="#about" class="btn-ghost magnetic-btn"><span>Our Heritage</span><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg></a>
+        </div>
+    </div>
+</section>
+
+<!-- CINEMATIC SCROLL REEL -->
+<section class="sec-cinematic" id="cinematic">
+    <div class="cinematic-frame">
+        <img src="assets/premium_kadak_chai_1772872092619.jpg" alt="Kadak Chai" class="active" data-frame="0">
+        <img src="assets/vintage_tea_leaves_1772872107280.jpg" alt="Tea Leaves" data-frame="1">
+        <img src="assets/saffron_spices_1772872120851.jpg" alt="Saffron Spices" data-frame="2">
+        <div class="cinematic-overlay"></div>
+    </div>
+    <div class="cinematic-content">
+        <div class="cinematic-chapter" data-chapter="0">
+            <span class="cinematic-chapter-num">01</span>
+            <h2>From the <em>misty hills</em><br>of Assam</h2>
+            <p>Where the Brahmaputra valley cradles tea gardens over a century old, our journey begins at dawn.</p>
+        </div>
+        <div class="cinematic-chapter" data-chapter="1">
+            <span class="cinematic-chapter-num">02</span>
+            <h2>Through the <em>ancient art</em><br>of stone grinding</h2>
+            <p>Hand-picked leaves meet granite mortars. No machines, no shortcuts � just patience and precision passed down through generations.</p>
+        </div>
+        <div class="cinematic-chapter" data-chapter="2">
+            <span class="cinematic-chapter-num">03</span>
+            <h2>Into your <em>cup,</em><br>a living heritage</h2>
+            <p>148 years of tradition, distilled into every golden pour. This isn't just chai � it's a time capsule.</p>
+        </div>
+    </div>
+    <div class="cinematic-progress">
+        <div class="cinematic-progress-fill" id="cinematicProgress"></div>
+    </div>
+    <div class="cinematic-counter">
+        <span class="cinematic-current">01</span>
+        <span class="cinematic-divider">/</span>
+        <span class="cinematic-total">03</span>
+    </div>
+</section>
+
+<!-- 2. MARQUEE -->
+<div class="marquee-strip">
+    <div class="marquee-track">
+        <span>Artisanal Blends</span><span class="marquee-dot">&#x25C6;</span>
+        <span>Heritage Recipes</span><span class="marquee-dot">&#x25C6;</span>
+        <span>Kashmiri Saffron</span><span class="marquee-dot">&#x25C6;</span>
+        <span>Zero Additives</span><span class="marquee-dot">&#x25C6;</span>
+        <span>Assam Orthodox</span><span class="marquee-dot">&#x25C6;</span>
+        <span>Malabar Cardamom</span><span class="marquee-dot">&#x25C6;</span>
+        <span>Artisanal Blends</span><span class="marquee-dot">&#x25C6;</span>
+        <span>Heritage Recipes</span><span class="marquee-dot">&#x25C6;</span>
+        <span>Kashmiri Saffron</span><span class="marquee-dot">&#x25C6;</span>
+        <span>Zero Additives</span><span class="marquee-dot">&#x25C6;</span>
+        <span>Assam Orthodox</span><span class="marquee-dot">&#x25C6;</span>
+        <span>Malabar Cardamom</span><span class="marquee-dot">&#x25C6;</span>
+    </div>
+</div>
+
+<!-- 3. ABOUT / HERITAGE -->
+<section class="sec-about" id="about">
+    <div class="container">
+        <div class="about-grid">
+            <div class="about-left">
+                <p class="eyebrow">The Manifesto</p>
+                <h2 class="section-title split-text">Rooted in history,<br><em>steeped in culture.</em></h2>
+                <p class="about-body">Virasat translates to heritage. We exist as custodians of the authentic <em>kadak</em> brew &#x2014; refusing commercial shortcuts, sourcing exclusively from heritage estates to preserve the rich, robust flavour profiles that defined an era of tea craftsmanship.</p>
+                <p class="about-body">Every leaf is hand-picked at peak maturity. Every spice is stone-ground using traditional methods. We don't just make tea &#x2014; we preserve a ritual that has united families across generations.</p>
+                <a href="#process" class="btn-text-arrow magnetic-btn"><span>See Our Process</span><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg></a>
+            </div>
+            <div class="about-right">
+                <div class="about-image-stack">
+                    <div class="about-img about-img-1 parallax-img">
+                        <img src="assets/vintage_tea_leaves_1772872107280.jpg" alt="Vintage tea leaves" loading="lazy">
+                    </div>
+                    <div class="about-img about-img-2 parallax-img">
+                        <img src="assets/saffron_spices_1772872120851.jpg" alt="Saffron and spices" loading="lazy">
+                    </div>
+                    <div class="about-stats-card glass-card">
+                        <div class="about-stat"><span class="stat-num" data-count="148">0</span><span class="stat-label">Years of Tradition</span></div>
+                        <div class="about-stat"><span class="stat-num" data-count="12">0</span><span class="stat-label">Heritage Estates</span></div>
+                        <div class="about-stat"><span class="stat-num" data-count="5000">0</span><span class="stat-label">Cups Brewed Daily</span></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- 4. BREWING PROCESS (Horizontal Scroll) -->
+<section class="sec-process" id="process">
+    <div class="container process-header">
+        <p class="eyebrow">The Ritual</p>
+        <h2 class="section-title split-text">How we brew<br><em>perfection.</em></h2>
+    </div>
+    <div class="process-track-wrapper">
+        <div class="process-track">
+            <div class="process-step">
+                <div class="step-num">01</div>
+                <div class="step-visual">
+                    <div class="step-icon-ring">
+                        <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 2a10 10 0 1 0 10 10"/><path d="M12 6v6l4 2"/></svg>
+                    </div>
+                </div>
+                <h3>Source &amp; Select</h3>
+                <p>Hand-selected leaves from Assam and Darjeeling heritage estates. Only the top two leaves and a bud make the cut.</p>
+            </div>
+            <div class="process-step">
+                <div class="step-num">02</div>
+                <div class="step-visual">
+                    <div class="step-icon-ring">
+                        <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M17 8h1a4 4 0 1 1 0 8h-1"/><path d="M3 8h14v9a4 4 0 0 1-4 4H7a4 4 0 0 1-4-4Z"/><line x1="6" y1="2" x2="6" y2="4"/><line x1="10" y1="2" x2="10" y2="4"/><line x1="14" y1="2" x2="14" y2="4"/></svg>
+                    </div>
+                </div>
+                <h3>Stone Grind Spices</h3>
+                <p>Cardamom, ginger, cloves and cinnamon &#x2014; stone-ground fresh for each micro-batch. No pre-processed powders, ever.</p>
+            </div>
+            <div class="process-step">
+                <div class="step-num">03</div>
+                <div class="step-visual">
+                    <div class="step-icon-ring">
+                        <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M8 2v4M16 2v4M3 10h18M5 4h14a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2z"/></svg>
+                    </div>
+                </div>
+                <h3>Slow Simmer</h3>
+                <p>Brewed low-and-slow on traditional brass vessels. The slow extraction pulls maximum flavour from every ingredient.</p>
+            </div>
+            <div class="process-step">
+                <div class="step-num">04</div>
+                <div class="step-visual">
+                    <div class="step-icon-ring">
+                        <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
+                    </div>
+                </div>
+                <h3>Seal &amp; Ship</h3>
+                <p>Nitrogen-flushed packaging within 48 hours of roasting. Arrives at your doorstep with peak freshness locked in.</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- 5. GALLERY (Fullscreen Slide) -->
+<section class="sec-gallery" id="gallery">
+    <div class="gallery-slides">
+        <div class="gallery-header-overlay">
+            <p class="eyebrow">Visual Journal</p>
+            <h2 class="section-title split-text">Moments of<br><em>indulgence.</em></h2>
+        </div>
+        <div class="gallery-slide"><img src="assets/premium_kadak_chai_1772872092619.jpg" alt="Kadak chai pour" loading="lazy"><div class="gallery-slide-caption"><span>01</span><h3>The Perfect Pour</h3></div></div>
+        <div class="gallery-slide"><img src="assets/vintage_tea_leaves_1772872107280.jpg" alt="Tea leaves macro" loading="lazy"><div class="gallery-slide-caption"><span>02</span><h3>Heritage Leaves</h3></div></div>
+        <div class="gallery-slide"><img src="assets/saffron_spices_1772872120851.jpg" alt="Spice arrangement" loading="lazy"><div class="gallery-slide-caption"><span>03</span><h3>Spice Alchemy</h3></div></div>
+        <div class="gallery-slide"><img src="assets/premium_kadak_chai_1772872092619.jpg" alt="Brass vessel brewing" loading="lazy"><div class="gallery-slide-caption"><span>04</span><h3>Brass Tradition</h3></div></div>
+        <div class="gallery-slide"><img src="assets/vintage_tea_leaves_1772872107280.jpg" alt="Morning ritual" loading="lazy"><div class="gallery-slide-caption"><span>05</span><h3>Morning Ritual</h3></div></div>
+    </div>
+</section>
+
+<!-- 6. SHOP -->
+<section class="sec-shop" id="shop">
+    <div class="container">
+        <div class="shop-header">
+            <div>
+                <p class="eyebrow">The Reserve Collection</p>
+                <h2 class="section-title split-text">Curations.</h2>
+            </div>
+            <div class="shop-filters">
+                <button class="filter-btn active" data-filter="all">All</button>
+                <button class="filter-btn" data-filter="classic">Classic</button>
+                <button class="filter-btn" data-filter="spiced">Spiced</button>
+                <button class="filter-btn" data-filter="limited">Limited</button>
+            </div>
+        </div>
+
+        <div class="products-grid">
+            <article class="product-card" data-category="classic" data-name="Original Kadak" data-price="499" data-img="assets/premium_kadak_chai_1772872092619.jpg" data-desc="The unfiltered classic. Remarkably bold with prominent malty notes and a deep amber pour." data-origin="Assam, India" data-strength="85" data-brew="4 minutes" data-temp="95C">
+                <div class="product-badge">Best Seller</div>
+                <div class="product-img-wrap">
+                    <img src="assets/premium_kadak_chai_1772872092619.jpg" alt="Original Kadak" loading="lazy">
+                    <button class="btn-quick-view">Quick View</button>
+                </div>
+                <div class="product-info">
+                    <div class="product-tags"><span>Classic</span><span>Full-bodied</span></div>
+                    <h3>No. 01 / Original Kadak</h3>
+                    <p>Remarkably bold with prominent malty notes.</p>
+                    <div class="product-bottom">
+                        <span class="product-price">&#x20B9;499</span>
+                        <button class="btn-add-cart magnetic-btn" aria-label="Add to cart">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                        </button>
+                    </div>
+                </div>
+            </article>
+
+            <article class="product-card" data-category="spiced" data-name="Spiced Botanicals" data-price="549" data-img="assets/saffron_spices_1772872120851.jpg" data-desc="An intricate melange of crushed cardamom, clove, and dried ginger sourced from the Malabar coast." data-origin="Kerala, India" data-strength="70" data-brew="5 minutes" data-temp="90C">
+                <div class="product-img-wrap">
+                    <img src="assets/saffron_spices_1772872120851.jpg" alt="Spiced Botanicals" loading="lazy">
+                    <button class="btn-quick-view">Quick View</button>
+                </div>
+                <div class="product-info">
+                    <div class="product-tags"><span>Spiced</span><span>Aromatic</span></div>
+                    <h3>No. 02 / Spiced Botanicals</h3>
+                    <p>Crushed cardamom, clove, and dried ginger melody.</p>
+                    <div class="product-bottom">
+                        <span class="product-price">&#x20B9;549</span>
+                        <button class="btn-add-cart magnetic-btn" aria-label="Add to cart">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                        </button>
+                    </div>
+                </div>
+            </article>
+
+            <article class="product-card" data-category="limited" data-name="Saffron Gold" data-price="699" data-img="assets/vintage_tea_leaves_1772872107280.jpg" data-desc="Kashmiri saffron threads infused into a premium Assam orthodox base. A golden elixir of unmatched depth." data-origin="Kashmir and Assam" data-strength="60" data-brew="6 minutes" data-temp="85C">
+                <div class="product-badge badge-limited">Limited Edition</div>
+                <div class="product-img-wrap">
+                    <img src="assets/vintage_tea_leaves_1772872107280.jpg" alt="Saffron Gold" loading="lazy">
+                    <button class="btn-quick-view">Quick View</button>
+                </div>
+                <div class="product-info">
+                    <div class="product-tags"><span>Limited</span><span>Saffron</span></div>
+                    <h3>No. 03 / Saffron Gold</h3>
+                    <p>Kashmiri saffron-infused golden elixir.</p>
+                    <div class="product-bottom">
+                        <span class="product-price">&#x20B9;699</span>
+                        <button class="btn-add-cart magnetic-btn" aria-label="Add to cart">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                        </button>
+                    </div>
+                </div>
+            </article>
+
+            <article class="product-card" data-category="classic" data-name="Darjeeling First Flush" data-price="799" data-img="assets/premium_kadak_chai_1772872092619.jpg" data-desc="Light and floral with a crisp muscatel finish. The champagne of teas, harvested in early spring." data-origin="Darjeeling, India" data-strength="40" data-brew="3 minutes" data-temp="80C">
+                <div class="product-badge badge-new">New Arrival</div>
+                <div class="product-img-wrap">
+                    <img src="assets/premium_kadak_chai_1772872092619.jpg" alt="Darjeeling First Flush" loading="lazy">
+                    <button class="btn-quick-view">Quick View</button>
+                </div>
+                <div class="product-info">
+                    <div class="product-tags"><span>Classic</span><span>Floral</span></div>
+                    <h3>No. 04 / Darjeeling First Flush</h3>
+                    <p>Muscatel finish, the champagne of teas.</p>
+                    <div class="product-bottom">
+                        <span class="product-price">&#x20B9;799</span>
+                        <button class="btn-add-cart magnetic-btn" aria-label="Add to cart">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                        </button>
+                    </div>
+                </div>
+            </article>
+
+            <article class="product-card" data-category="spiced" data-name="Masala Storm" data-price="549" data-img="assets/saffron_spices_1772872120851.jpg" data-desc="For those who want the heat. Black pepper, star anise, and long pepper unite in this bold masala chai." data-origin="Tamil Nadu, India" data-strength="95" data-brew="5 minutes" data-temp="100C">
+                <div class="product-img-wrap">
+                    <img src="assets/saffron_spices_1772872120851.jpg" alt="Masala Storm" loading="lazy">
+                    <button class="btn-quick-view">Quick View</button>
+                </div>
+                <div class="product-info">
+                    <div class="product-tags"><span>Spiced</span><span>Intense</span></div>
+                    <h3>No. 05 / Masala Storm</h3>
+                    <p>Black pepper and star anise &#x2014; bold and fierce.</p>
+                    <div class="product-bottom">
+                        <span class="product-price">&#x20B9;549</span>
+                        <button class="btn-add-cart magnetic-btn" aria-label="Add to cart">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                        </button>
+                    </div>
+                </div>
+            </article>
+
+            <article class="product-card" data-category="limited" data-name="Rose Petal Reserve" data-price="899" data-img="assets/vintage_tea_leaves_1772872107280.jpg" data-desc="Sun-dried Kannauj rose petals layered over white tea. An ephemeral blend available for three months only." data-origin="Kannauj and Nilgiris" data-strength="30" data-brew="4 minutes" data-temp="75C">
+                <div class="product-badge badge-limited">Seasonal</div>
+                <div class="product-img-wrap">
+                    <img src="assets/vintage_tea_leaves_1772872107280.jpg" alt="Rose Petal Reserve" loading="lazy">
+                    <button class="btn-quick-view">Quick View</button>
+                </div>
+                <div class="product-info">
+                    <div class="product-tags"><span>Limited</span><span>Floral</span></div>
+                    <h3>No. 06 / Rose Petal Reserve</h3>
+                    <p>Sun-dried rose petals over white tea base.</p>
+                    <div class="product-bottom">
+                        <span class="product-price">&#x20B9;899</span>
+                        <button class="btn-add-cart magnetic-btn" aria-label="Add to cart">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                        </button>
+                    </div>
+                </div>
+            </article>
+        </div>
+    </div>
+</section>
+
+<!-- 7. INGREDIENTS EXPLORER -->
+<section class="sec-ingredients" id="ingredients">
+    <div class="container">
+        <div class="ing-header">
+            <p class="eyebrow">Know Your Brew</p>
+            <h2 class="section-title split-text">The purest botanicals,<br><em>carefully selected.</em></h2>
+        </div>
+        <div class="ing-explorer">
+            <div class="ing-tabs">
+                <button class="ing-tab active" data-ing="saffron">
+                    <span class="ing-tab-num">01</span>
+                    <span class="ing-tab-name">Kashmiri Saffron</span>
+                </button>
+                <button class="ing-tab" data-ing="assam">
+                    <span class="ing-tab-num">02</span>
+                    <span class="ing-tab-name">Assam Orthodox</span>
+                </button>
+                <button class="ing-tab" data-ing="cardamom">
+                    <span class="ing-tab-num">03</span>
+                    <span class="ing-tab-name">Malabar Cardamom</span>
+                </button>
+                <button class="ing-tab" data-ing="ginger">
+                    <span class="ing-tab-num">04</span>
+                    <span class="ing-tab-name">Wayanad Ginger</span>
+                </button>
+            </div>
+            <div class="ing-panels">
+                <div class="ing-panel active" data-panel="saffron">
+                    <div class="ing-panel-img"><img src="assets/saffron_spices_1772872120851.jpg" alt="Kashmiri Saffron" loading="lazy"></div>
+                    <div class="ing-panel-content">
+                        <h3>Kashmiri Saffron</h3>
+                        <p>Sourced from elevated terrains at 1,600m altitude, our saffron comes exclusively from Pampore, Kashmir &#x2014; the only place in India where this precious spice grows. Each strand is hand-picked at dawn when the flowers first bloom.</p>
+                        <div class="ing-meta">
+                            <div class="ing-meta-item"><span class="meta-label">Region</span><span>Pampore, Kashmir</span></div>
+                            <div class="ing-meta-item"><span class="meta-label">Altitude</span><span>1,600m</span></div>
+                            <div class="ing-meta-item"><span class="meta-label">Harvest</span><span>October &#x2014; November</span></div>
+                            <div class="ing-meta-item"><span class="meta-label">Grade</span><span>Mongra (Grade I)</span></div>
+                        </div>
+                    </div>
+                </div>
+                <div class="ing-panel" data-panel="assam">
+                    <div class="ing-panel-img"><img src="assets/vintage_tea_leaves_1772872107280.jpg" alt="Assam Orthodox" loading="lazy"></div>
+                    <div class="ing-panel-content">
+                        <h3>Assam Orthodox</h3>
+                        <p>Full-bodied black tea cultivated in the region's most historic estates along the Brahmaputra valley. Our orthodox-process leaves are rolled and fermented slowly to unlock complex malty flavours impossible with CTC methods.</p>
+                        <div class="ing-meta">
+                            <div class="ing-meta-item"><span class="meta-label">Region</span><span>Upper Assam</span></div>
+                            <div class="ing-meta-item"><span class="meta-label">Altitude</span><span>45-120m</span></div>
+                            <div class="ing-meta-item"><span class="meta-label">Harvest</span><span>Second Flush (June)</span></div>
+                            <div class="ing-meta-item"><span class="meta-label">Process</span><span>Orthodox Roll</span></div>
+                        </div>
+                    </div>
+                </div>
+                <div class="ing-panel" data-panel="cardamom">
+                    <div class="ing-panel-img"><img src="assets/saffron_spices_1772872120851.jpg" alt="Malabar Cardamom" loading="lazy"></div>
+                    <div class="ing-panel-content">
+                        <h3>Malabar Cardamom</h3>
+                        <p>Intensely aromatic green pods from the Cardamom Hills of Kerala. We use only 8mm+ grade extra-bold pods, cracked open moments before blending to preserve volatile essential oils that give our chai its signature aroma.</p>
+                        <div class="ing-meta">
+                            <div class="ing-meta-item"><span class="meta-label">Region</span><span>Idukki, Kerala</span></div>
+                            <div class="ing-meta-item"><span class="meta-label">Altitude</span><span>600-1,500m</span></div>
+                            <div class="ing-meta-item"><span class="meta-label">Grade</span><span>8mm+ Extra Bold</span></div>
+                            <div class="ing-meta-item"><span class="meta-label">Method</span><span>Cracked Fresh</span></div>
+                        </div>
+                    </div>
+                </div>
+                <div class="ing-panel" data-panel="ginger">
+                    <div class="ing-panel-img"><img src="assets/vintage_tea_leaves_1772872107280.jpg" alt="Wayanad Ginger" loading="lazy"></div>
+                    <div class="ing-panel-content">
+                        <h3>Wayanad Ginger</h3>
+                        <p>Wild-harvested ginger from the Wayanad forests of northern Kerala. Higher in gingerol content than commercial varieties, it provides the characteristic sharp warmth that cuts through milk and sugar perfectly.</p>
+                        <div class="ing-meta">
+                            <div class="ing-meta-item"><span class="meta-label">Region</span><span>Wayanad, Kerala</span></div>
+                            <div class="ing-meta-item"><span class="meta-label">Type</span><span>Wild-Harvested</span></div>
+                            <div class="ing-meta-item"><span class="meta-label">Profile</span><span>High Gingerol</span></div>
+                            <div class="ing-meta-item"><span class="meta-label">Method</span><span>Sun-Dried Slices</span></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- 8. TESTIMONIALS -->
+<section class="sec-testimonials" id="testimonials">
+    <div class="container">
+        <div class="test-header">
+            <p class="eyebrow">What They Say</p>
+            <h2 class="section-title split-text">Voices from<br><em>our community.</em></h2>
+        </div>
+        <div class="testimonials-slider">
+            <div class="testimonial-track" id="testimonialTrack">
+                <div class="testimonial-card glass-card">
+                    <div class="testimonial-stars">&#x2605;&#x2605;&#x2605;&#x2605;&#x2605;</div>
+                    <p class="testimonial-quote">"This is not just tea. The Original Kadak transported me straight to my grandmother's kitchen. The depth of flavour is unlike anything I've found commercially."</p>
+                    <div class="testimonial-author">
+                        <div class="testimonial-avatar">PR</div>
+                        <div><strong>Priya Raghavan</strong><span>Mumbai, India</span></div>
+                    </div>
+                </div>
+                <div class="testimonial-card glass-card">
+                    <div class="testimonial-stars">&#x2605;&#x2605;&#x2605;&#x2605;&#x2605;</div>
+                    <p class="testimonial-quote">"The Saffron Gold is an absolute revelation. I've tried saffron teas before, but none compare to the richness of this blend. Worth every rupee."</p>
+                    <div class="testimonial-author">
+                        <div class="testimonial-avatar">AK</div>
+                        <div><strong>Aman Kapoor</strong><span>Delhi, India</span></div>
+                    </div>
+                </div>
+                <div class="testimonial-card glass-card">
+                    <div class="testimonial-stars">&#x2605;&#x2605;&#x2605;&#x2605;&#x2605;</div>
+                    <p class="testimonial-quote">"I run a specialty cafe and now exclusively serve Virasat chai. My customers can taste the difference. The quality is uncompromising."</p>
+                    <div class="testimonial-author">
+                        <div class="testimonial-avatar">SJ</div>
+                        <div><strong>Sarita Joshi</strong><span>Pune, India</span></div>
+                    </div>
+                </div>
+                <div class="testimonial-card glass-card">
+                    <div class="testimonial-stars">&#x2605;&#x2605;&#x2605;&#x2605;&#x2605;</div>
+                    <p class="testimonial-quote">"As an NRI, finding authentic kadak chai was impossible. Virasat ships internationally and the freshness is maintained perfectly. My evening ritual is complete again."</p>
+                    <div class="testimonial-author">
+                        <div class="testimonial-avatar">RN</div>
+                        <div><strong>Rohan Nair</strong><span>London, UK</span></div>
+                    </div>
+                </div>
+            </div>
+            <div class="testimonial-controls">
+                <button class="test-arrow test-prev magnetic-btn" aria-label="Previous">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+                </button>
+                <div class="test-dots" id="testDots"></div>
+                <button class="test-arrow test-next magnetic-btn" aria-label="Next">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+                </button>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- 9. FAQ -->
+<section class="sec-faq" id="faq">
+    <div class="container">
+        <div class="faq-grid">
+            <div class="faq-left">
+                <p class="eyebrow">Got Questions?</p>
+                <h2 class="section-title split-text">Frequently<br><em>asked.</em></h2>
+                <p class="faq-subtitle">Can't find what you're looking for? Reach out to our concierge team.</p>
+                <a href="#contact" class="btn-text-arrow magnetic-btn"><span>Contact Us</span><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg></a>
+            </div>
+            <div class="faq-right">
+                <div class="faq-item">
+                    <button class="faq-question">
+                        <span>How is Virasat Chai different from regular chai?</span>
+                        <div class="faq-icon"><span></span><span></span></div>
+                    </button>
+                    <div class="faq-answer"><p>Our chai is sourced from single-origin heritage estates, stone-ground fresh for each batch, and blended by hand. No artificial flavours, no pre-mixed powders &#x2014; just authentic ingredients processed the traditional way.</p></div>
+                </div>
+                <div class="faq-item">
+                    <button class="faq-question">
+                        <span>How should I brew Virasat Chai?</span>
+                        <div class="faq-icon"><span></span><span></span></div>
+                    </button>
+                    <div class="faq-answer"><p>Add 1 teaspoon per cup to boiling water (or milk), simmer on low heat for 3-5 minutes depending on desired strength. For best results, use a mix of half water and half full-fat milk. Strain and enjoy.</p></div>
+                </div>
+                <div class="faq-item">
+                    <button class="faq-question">
+                        <span>Do you ship internationally?</span>
+                        <div class="faq-icon"><span></span><span></span></div>
+                    </button>
+                    <div class="faq-answer"><p>Yes! We ship to over 30 countries. International orders are nitrogen-flushed for freshness and typically arrive within 7-12 business days. Free shipping on orders above &#x20B9;2,000.</p></div>
+                </div>
+                <div class="faq-item">
+                    <button class="faq-question">
+                        <span>What is your return and refund policy?</span>
+                        <div class="faq-icon"><span></span><span></span></div>
+                    </button>
+                    <div class="faq-answer"><p>If you're not satisfied, we offer a full refund within 30 days &#x2014; no questions asked. Unopened products can be returned for a complete exchange. Contact our concierge to initiate a return.</p></div>
+                </div>
+                <div class="faq-item">
+                    <button class="faq-question">
+                        <span>Are your products organic and additive-free?</span>
+                        <div class="faq-icon"><span></span><span></span></div>
+                    </button>
+                    <div class="faq-answer"><p>100%. All our ingredients are certified organic and we never use artificial flavours, colours, or preservatives. Every batch is lab-tested for purity before packaging.</p></div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- 10. CONTACT / FOOTER -->
+<section class="sec-contact" id="contact">
+    <div class="container">
+        <div class="contact-top">
+            <div class="contact-brand">virasat.</div>
+        </div>
+        <div class="contact-grid">
+            <div class="contact-col">
+                <h4>Join the Ledger</h4>
+                <p>Subscribe for archival releases, tasting notes, and private event invitations.</p>
+                <form class="newsletter-form" id="newsletterForm">
+                    <div class="input-wrap">
+                        <input type="email" placeholder="Your email address" required>
+                        <button type="submit" class="magnetic-btn" aria-label="Subscribe">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+                        </button>
+                    </div>
+                    <span class="form-success" id="formSuccess">Welcome to the archive!</span>
                 </form>
             </div>
-            <div class="footer-col">
-                <h4>Collections</h4>
-                <a href="#collection">No. 01 / Original Kadak</a>
-                <a href="#collection">No. 02 / Botanical Mix</a>
-                <a href="#collection">No. 03 / Ginger Infusion</a>
+            <div class="contact-col">
+                <h4>Explore</h4>
+                <a href="#about">Our Heritage</a>
+                <a href="#process">The Process</a>
+                <a href="#shop">Shop Collection</a>
+                <a href="#ingredients">Ingredients</a>
             </div>
-            <div class="footer-col">
-                <h4>Dispatch</h4>
-                <a href="#story">Our Manifesto</a>
-                <a href="#craft">Artisan Network</a>
+            <div class="contact-col">
+                <h4>Support</h4>
+                <a href="#faq">FAQ</a>
+                <a href="#">Shipping Info</a>
+                <a href="#">Returns and Refunds</a>
                 <a href="#">Concierge</a>
             </div>
-        </div>
-        <div class="footer-bottom">
-            <p>&copy; 2026 Virasat Chai. Purveyors of Fine Tea.</p>
-            <div class="socials">
+            <div class="contact-col">
+                <h4>Connect</h4>
                 <a href="#">Instagram</a>
+                <a href="#">Twitter / X</a>
                 <a href="#">Journal</a>
+                <a href="#">Press Kit</a>
             </div>
         </div>
-    </footer>
+        <div class="contact-bottom">
+            <p>&#xA9; 2026 Virasat Chai. Purveyors of Fine Tea.</p>
+            <div class="contact-bottom-links">
+                <a href="#">Privacy</a>
+                <a href="#">Terms</a>
+            </div>
+        </div>
+    </div>
+</section>
 
-    <!-- GSAP & Core JS -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>
-    <script src="script.js"></script>
+</main>
+
+<!-- Scripts -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollToPlugin.min.js"></script>
+<script src="https://unpkg.com/lenis@1.1.13/dist/lenis.min.js"></script>
+<script src="https://unpkg.com/split-type"></script>
+<script src="script.js"></script>
+<script src="animations.js"></script>
 </body>
-
 </html>

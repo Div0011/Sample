@@ -1,0 +1,90 @@
+/* ════════════════════════════════════════════════════
+   VIRASAT CHAI — PREMIUM ANIMATION LAYER
+   Scroll-driven motion design (non-destructive)
+   Does NOT override existing design variables or styles
+   ════════════════════════════════════════════════════ */
+
+/* ── Lenis Smooth Scroll ── */
+html.lenis, html.lenis body {
+    height: auto;
+}
+.lenis.lenis-smooth {
+    scroll-behavior: auto !important;
+}
+.lenis.lenis-smooth [data-lenis-prevent] {
+    overscroll-behavior: contain;
+}
+.lenis.lenis-stopped {
+    overflow: hidden;
+}
+
+/* ── Scroll Blur: UI OVERLAYS ONLY, never main content ── */
+body.is-scrolling .side-nav {
+    filter: blur(3px);
+    opacity: 0.3;
+    transition: filter 0.3s ease, opacity 0.3s ease;
+}
+body.is-scrolling .nav-menu-toggle {
+    opacity: 0.4;
+    transition: opacity 0.3s ease;
+}
+body.is-scrolling .scroll-progress {
+    opacity: 0.3;
+    transition: opacity 0.3s ease;
+}
+body:not(.is-scrolling) .side-nav {
+    filter: none;
+    opacity: 1;
+    transition: filter 0.6s ease, opacity 0.6s ease;
+}
+body:not(.is-scrolling) .nav-menu-toggle {
+    opacity: 1;
+    transition: opacity 0.6s ease;
+}
+body:not(.is-scrolling) .scroll-progress {
+    opacity: 1;
+    transition: opacity 0.6s ease;
+}
+/* Cart ALWAYS crisp and visible — never blurred */
+.nav-right,
+.cart-btn,
+.cart-count {
+    filter: none !important;
+    opacity: 1 !important;
+}
+
+/* ── SplitType: Line containers for masked reveals ── */
+.split-text .line {
+    overflow: hidden;
+    padding-bottom: 0.08em;
+}
+
+/* ── Data-parallax GPU acceleration ── */
+[data-parallax] {
+    will-change: transform;
+    transform: translateZ(0);
+}
+
+/* ── Performance hints for heavy sections ── */
+.sec-cinematic,
+.gallery-slides,
+.process-track {
+    will-change: transform;
+}
+
+/* ── Reduced Motion: respect user accessibility preferences ── */
+@media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+        scroll-behavior: auto !important;
+    }
+    .split-text .word {
+        transform: none !important;
+        opacity: 1 !important;
+    }
+    [data-parallax] {
+        transform: none !important;
+    }
+}
