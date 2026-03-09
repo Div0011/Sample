@@ -391,6 +391,32 @@
     initTestDots();
     window.addEventListener("resize", initTestDots);
 
+    /* Touch swipe for testimonials */
+    (function () {
+        let startX = 0, startY = 0, isDragging = false;
+        const slider = $(".testimonials-slider");
+        if (!slider) return;
+        slider.addEventListener("touchstart", function (e) {
+            startX = e.touches[0].clientX;
+            startY = e.touches[0].clientY;
+            isDragging = true;
+        }, { passive: true });
+        slider.addEventListener("touchend", function (e) {
+            if (!isDragging) return;
+            isDragging = false;
+            var endX = e.changedTouches[0].clientX;
+            var endY = e.changedTouches[0].clientY;
+            var diffX = startX - endX;
+            var diffY = Math.abs(startY - endY);
+            if (Math.abs(diffX) > 40 && Math.abs(diffX) > diffY) {
+                var page = Math.floor(testIndex / testPerView);
+                var totalPages = Math.ceil(testCards.length / testPerView);
+                if (diffX > 0) goToTest(Math.min(totalPages - 1, page + 1));
+                else goToTest(Math.max(0, page - 1));
+            }
+        }, { passive: true });
+    })();
+
     /* ══════════════════════════════
        NEWSLETTER FORM
        ══════════════════════════════ */
