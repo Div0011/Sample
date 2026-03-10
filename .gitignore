@@ -1,0 +1,17 @@
+# Large video files
+*.mp4
+*.zip
+
+# OS files
+Thumbs.db
+.DS_Store
+
+# Editor
+.vscode/
+*.code-workspace
+
+# Node
+node_modules/
+
+# Build helper (not needed in prod)
+update_styles.js

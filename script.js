@@ -432,11 +432,95 @@
        GSAP SCROLL ANIMATIONS
        ══════════════════════════════ */
     function initAnimations() {
-        /* Hero content reveal */
-        const heroTL = gsap.timeline({ delay: 0.5 });
-        heroTL
-            .to(".sec-hero .eyebrow.anim-up", { opacity: 1, y: 0, duration: 0.8, ease: "power3.out" })
-            .to(".hero-actions.anim-up", { opacity: 1, y: 0, duration: 0.6, ease: "power3.out" }, "-=0.3");
+        /* ── SCROLL-DRIVEN FRAME SEQUENCE ── */
+        var heroCanvas = document.getElementById("heroCanvas");
+        var heroScrollHint = document.getElementById("heroScrollHint");
+        var heroContent = document.getElementById("heroContent");
+
+        if (heroCanvas) {
+            var ctx = heroCanvas.getContext("2d");
+            var TOTAL_FRAMES = 104;
+            var frames = [];
+            var loadedCount = 0;
+            var currentFrame = 0;
+
+            /* Size canvas to fill the hero (DPR-aware for sharp mobile) */
+            function sizeCanvas() {
+                var wrap = heroCanvas.parentElement;
+                var dpr = Math.min(window.devicePixelRatio || 1, 2);
+                heroCanvas.width = wrap.offsetWidth * dpr;
+                heroCanvas.height = wrap.offsetHeight * dpr;
+                heroCanvas.style.width = wrap.offsetWidth + "px";
+                heroCanvas.style.height = wrap.offsetHeight + "px";
+                ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+                drawFrame(currentFrame);
+            }
+            sizeCanvas();
+            window.addEventListener("resize", sizeCanvas);
+
+            /* On mobile, load every 2nd frame to save memory (52 instead of 104) */
+            var isMobile = window.innerWidth <= 768;
+            var frameStep = isMobile ? 2 : 1;
+            for (var i = 1; i <= TOTAL_FRAMES; i += frameStep) {
+                var img = new Image();
+                img.src = "assets/frames/ezgif-frame-" + String(i).padStart(3, "0") + ".jpg";
+                img.onload = function() {
+                    loadedCount++;
+                    /* Draw first frame as soon as it loads */
+                    if (loadedCount === 1) drawFrame(0);
+                };
+                frames.push(img);
+            }
+
+            /* Draw a specific frame onto the canvas (cover-fit) */
+            function drawFrame(index) {
+                if (index < 0 || index >= frames.length) return;
+                var img = frames[index];
+                if (!img || !img.complete || !img.naturalWidth) return;
+                var cw = heroCanvas.width, ch = heroCanvas.height;
+                var dpr = Math.min(window.devicePixelRatio || 1, 2);
+                cw = cw / dpr; ch = ch / dpr;
+                var iw = img.naturalWidth, ih = img.naturalHeight;
+                var scale = Math.max(cw / iw, ch / ih);
+                var dw = iw * scale, dh = ih * scale;
+                var dx = (cw - dw) / 2, dy = (ch - dh) / 2;
+                ctx.drawImage(img, dx, dy, dw, dh);
+                currentFrame = index;
+            }
+
+            /* Pin hero and map scroll to frame index */
+            var actualFrameCount = frames.length;
+            ScrollTrigger.create({
+                trigger: ".sec-hero",
+                start: "top top",
+                end: isMobile ? "+=200%" : "+=300%",
+                pin: true,
+                pinSpacing: true,
+                onUpdate: function(self) {
+                    var progress = self.progress;
+
+                    /* Map scroll progress to frame index */
+                    var frameIndex = Math.min(actualFrameCount - 1, Math.floor(progress * actualFrameCount));
+                    if (frameIndex !== currentFrame) {
+                        drawFrame(frameIndex);
+                    }
+
+                    /* Fade out scroll hint quickly */
+                    if (heroScrollHint) {
+                        heroScrollHint.style.opacity = Math.max(0, 1 - progress * 5);
+                    }
+
+                    /* Show hero buttons only when frames are near the end (last 15%) */
+                    if (heroContent) {
+                        if (progress > 0.85) {
+                            heroContent.classList.add("visible");
+                        } else {
+                            heroContent.classList.remove("visible");
+                        }
+                    }
+                }
+            });
+        }
 
         /* About stat counters */
         $$(".stat-num").forEach(num => {
@@ -448,13 +532,6 @@
                 snap: { textContent: 1 },
                 scrollTrigger: { trigger: num, start: "top 80%" },
             });
-        });
-
-        /* Hero BG parallax */
-        gsap.to(".hero-bg-img", {
-            yPercent: 20,
-            ease: "none",
-            scrollTrigger: { trigger: ".sec-hero", start: "top top", end: "bottom top", scrub: true }
         });
 
         /* ── CINEMATIC SCROLL REEL WITH CHAPTERS ── */
@@ -745,18 +822,102 @@
     }
 
     /* ══════════════════════════════
-       CUSTOM CURSOR
+       COFFEE RIPPLE CURSOR
        ══════════════════════════════ */
     if (window.matchMedia("(pointer: fine)").matches) {
         let mx = 0, my = 0, cx = 0, cy = 0, rx = 0, ry = 0;
 
-        document.addEventListener("mousemove", e => { mx = e.clientX; my = e.clientY; });
+        /* Ripple canvas for water trail effect */
+        var rippleCanvas = document.getElementById("rippleCanvas");
+        var rCtx = rippleCanvas ? rippleCanvas.getContext("2d") : null;
+        var ripples = [];
+        var lastRippleTime = 0;
 
+        function sizeRippleCanvas() {
+            if (!rippleCanvas) return;
+            var dpr = Math.min(window.devicePixelRatio || 1, 2);
+            rippleCanvas.width = window.innerWidth * dpr;
+            rippleCanvas.height = window.innerHeight * dpr;
+            rippleCanvas.style.width = window.innerWidth + "px";
+            rippleCanvas.style.height = window.innerHeight + "px";
+            if (rCtx) rCtx.setTransform(dpr, 0, 0, dpr, 0, 0);
+        }
+        sizeRippleCanvas();
+        window.addEventListener("resize", sizeRippleCanvas);
+
+        document.addEventListener("mousemove", function(e) {
+            mx = e.clientX; my = e.clientY;
+            /* Drop a ripple every ~60ms as mouse moves */
+            var now = Date.now();
+            if (now - lastRippleTime > 60) {
+                ripples.push({ x: mx, y: my, radius: 2, maxRadius: 35, opacity: 0.5, speed: 0.8 });
+                lastRippleTime = now;
+            }
+        });
+
+        /* Click creates a bigger burst of ripples */
+        document.addEventListener("mousedown", function() {
+            for (var i = 0; i < 3; i++) {
+                ripples.push({
+                    x: mx + (Math.random() - 0.5) * 10,
+                    y: my + (Math.random() - 0.5) * 10,
+                    radius: 2,
+                    maxRadius: 60 + i * 15,
+                    opacity: 0.6 - i * 0.1,
+                    speed: 1.2 - i * 0.2
+                });
+            }
+        });
+
+        /* Animate ripples on canvas */
+        function drawRipples() {
+            if (!rCtx) { requestAnimationFrame(drawRipples); return; }
+            rCtx.clearRect(0, 0, rippleCanvas.width, rippleCanvas.height);
+
+            for (var i = ripples.length - 1; i >= 0; i--) {
+                var r = ripples[i];
+                r.radius += r.speed;
+                r.opacity -= 0.01;
+
+                if (r.opacity <= 0 || r.radius >= r.maxRadius) {
+                    ripples.splice(i, 1);
+                    continue;
+                }
+
+                rCtx.beginPath();
+                rCtx.arc(r.x, r.y, r.radius, 0, Math.PI * 2);
+                rCtx.strokeStyle = "rgba(92, 55, 28, " + r.opacity + ")";
+                rCtx.lineWidth = 2;
+                rCtx.stroke();
+
+                /* Inner glow ring */
+                rCtx.beginPath();
+                rCtx.arc(r.x, r.y, r.radius * 0.6, 0, Math.PI * 2);
+                rCtx.strokeStyle = "rgba(160, 100, 40, " + (r.opacity * 0.7) + ")";
+                rCtx.lineWidth = 1.5;
+                rCtx.stroke();
+            }
+
+            /* Glow at cursor position */
+            var glowGrad = rCtx.createRadialGradient(cx, cy, 0, cx, cy, 35);
+            glowGrad.addColorStop(0, "rgba(92, 55, 28, 0.18)");
+            glowGrad.addColorStop(0.5, "rgba(243, 193, 140, 0.08)");
+            glowGrad.addColorStop(1, "rgba(243, 193, 140, 0)");
+            rCtx.fillStyle = glowGrad;
+            rCtx.beginPath();
+            rCtx.arc(cx, cy, 35, 0, Math.PI * 2);
+            rCtx.fill();
+
+            requestAnimationFrame(drawRipples);
+        }
+        requestAnimationFrame(drawRipples);
+
+        /* Cursor dot + ring position */
         function updateCursor() {
-            cx += (mx - cx) * 0.2;
-            cy += (my - cy) * 0.2;
-            rx += (mx - rx) * 0.08;
-            ry += (my - ry) * 0.08;
+            cx += (mx - cx) * 0.25;
+            cy += (my - cy) * 0.25;
+            rx += (mx - rx) * 0.1;
+            ry += (my - ry) * 0.1;
 
             cursorDot.style.left = cx + "px";
             cursorDot.style.top = cy + "px";
@@ -769,30 +930,52 @@
         requestAnimationFrame(updateCursor);
 
         /* Hover states */
-        $$(".magnetic-btn, .nav-link, .filter-btn, .ing-tab, .faq-question, .product-card, .side-dot").forEach(el => {
-            el.addEventListener("mouseenter", () => document.body.classList.add("cursor-hover"));
-            el.addEventListener("mouseleave", () => document.body.classList.remove("cursor-hover"));
+        $$(".magnetic-btn, .nav-link, .filter-btn, .ing-tab, .faq-question, .product-card, .side-dot, .btn-text-arrow, .btn-add-cart").forEach(function(el) {
+            el.addEventListener("mouseenter", function() { document.body.classList.add("cursor-hover"); });
+            el.addEventListener("mouseleave", function() { document.body.classList.remove("cursor-hover"); });
         });
 
-        $$(".gallery-slide, .product-img-wrap").forEach(el => {
-            el.addEventListener("mouseenter", () => { document.body.classList.add("cursor-view"); cursorText.textContent = "View"; });
-            el.addEventListener("mouseleave", () => document.body.classList.remove("cursor-view"));
+        /* View state for galleries & product images */
+        $$(".gallery-slide, .product-img-wrap").forEach(function(el) {
+            el.addEventListener("mouseenter", function() { document.body.classList.add("cursor-view"); cursorText.textContent = "View"; });
+            el.addEventListener("mouseleave", function() { document.body.classList.remove("cursor-view"); });
         });
     }
 
     /* ══════════════════════════════
-       MAGNETIC BUTTONS
+       MAGNETIC BUTTONS + WAVE CLICK
        ══════════════════════════════ */
     if (window.matchMedia("(pointer: fine)").matches) {
-        $$(".magnetic-btn").forEach(btn => {
-            btn.addEventListener("mousemove", e => {
-                const rect = btn.getBoundingClientRect();
-                const dx = e.clientX - (rect.left + rect.width / 2);
-                const dy = e.clientY - (rect.top + rect.height / 2);
-                gsap.to(btn, { x: dx * 0.3, y: dy * 0.3, duration: 0.4, ease: "power2.out" });
+        $$(".magnetic-btn").forEach(function(btn) {
+            btn.addEventListener("mousemove", function(e) {
+                var rect = btn.getBoundingClientRect();
+                var dx = e.clientX - (rect.left + rect.width / 2);
+                var dy = e.clientY - (rect.top + rect.height / 2);
+                gsap.to(btn, { x: dx * 0.35, y: dy * 0.35, duration: 0.4, ease: "power2.out" });
             });
-            btn.addEventListener("mouseleave", () => {
-                gsap.to(btn, { x: 0, y: 0, duration: 0.6, ease: "elastic.out(1, 0.4)" });
+            btn.addEventListener("mouseleave", function() {
+                gsap.to(btn, { x: 0, y: 0, duration: 0.7, ease: "elastic.out(1, 0.3)" });
+            });
+        });
+
+        /* Multi-wave ripple on button click */
+        $$(".btn-primary, .btn-ghost, .btn-checkout, .btn-add-modal, .btn-add-cart, .filter-btn").forEach(function(btn) {
+            btn.style.position = "relative";
+            btn.style.overflow = "hidden";
+            btn.addEventListener("click", function(e) {
+                var rect = btn.getBoundingClientRect();
+                var x = (e.clientX - rect.left) + "px";
+                var y = (e.clientY - rect.top) + "px";
+                /* Spawn 3 concentric wave rings */
+                for (var i = 0; i < 3; i++) {
+                    var wave = document.createElement("span");
+                    wave.className = "wave-ripple";
+                    wave.style.left = x;
+                    wave.style.top = y;
+                    wave.style.animationDelay = (i * 0.1) + "s";
+                    btn.appendChild(wave);
+                    wave.addEventListener("animationend", function() { this.remove(); });
+                }
             });
         });
     }
