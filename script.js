@@ -1,4 +1,4 @@
-﻿/* ═══════════════════════════════════════════════════
+/* ═══════════════════════════════════════════════════
    VIRASAT CHAI — INTERACTIVE ENGINE v2.0
    GSAP + ScrollTrigger + Custom Animations
    ═══════════════════════════════════════════════════ */
@@ -35,7 +35,18 @@
     const cursorRing      = $(".cursor-ring");
     const cursorText      = $(".cursor-text");
     const particleCanvas  = $("#particles");
-    const particleCtx     = particleCanvas.getContext("2d");
+    
+    /* ── MOBILE CHECK ── */
+    const isMobile = window.matchMedia("(max-width: 768px)").matches || 
+                   window.matchMedia("(pointer: coarse)").matches;
+    const isLowPower = isMobile && (navigator.hardwareConcurrency <= 4);
+
+    let particleCtx = null;
+    if (particleCanvas && !isMobile) {
+        particleCtx = particleCanvas.getContext("2d");
+    } else if (particleCanvas) {
+        particleCanvas.style.display = 'none';
+    }
 
     /* ══════════════════════════════
        PRELOADER
@@ -458,9 +469,10 @@
             sizeCanvas();
             window.addEventListener("resize", sizeCanvas);
 
-            /* On mobile, load every 2nd frame to save memory (52 instead of 104) */
-            var isMobile = window.innerWidth <= 768;
-            var frameStep = isMobile ? 2 : 1;
+            /* On mobile, load fewer frames to save memory and reduce initial peak bandwidth */
+            var actualIsMobile = window.innerWidth <= 768;
+            var frameStep = actualIsMobile ? (isLowPower ? 4 : 2) : 1;
+            
             for (var i = 1; i <= TOTAL_FRAMES; i += frameStep) {
                 var img = new Image();
                 img.src = "assets/frames/ezgif-frame-" + String(i).padStart(3, "0") + ".jpg";
