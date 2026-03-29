@@ -293,18 +293,32 @@
     /* ══════════════════════════════
        PRODUCT FILTERS
        ══════════════════════════════ */
+    function filterProducts(filter, animate = true) {
+        $$(".product-card").forEach(card => {
+            const show = filter === "all" || card.dataset.category === filter;
+            card.classList.toggle("hidden", !show);
+            if (show) {
+                if (animate) {
+                    gsap.fromTo(card, { opacity: 0, y: 20 }, { opacity: 1, y: 0, duration: 0.4, ease: "power2.out", clearProps: "all" });
+                } else {
+                    gsap.set(card, { clearProps: "all" });
+                    card.style.opacity = "1";
+                    card.style.transform = "none";
+                }
+            }
+        });
+    }
+
     $$(".filter-btn").forEach(btn => {
         btn.addEventListener("click", () => {
             $$(".filter-btn").forEach(b => b.classList.remove("active"));
             btn.classList.add("active");
-            const filter = btn.dataset.filter;
-            $$(".product-card").forEach(card => {
-                const show = filter === "all" || card.dataset.category === filter;
-                card.classList.toggle("hidden", !show);
-                if (show) gsap.fromTo(card, { opacity: 0, y: 20 }, { opacity: 1, y: 0, duration: 0.4, ease: "power2.out" });
-            });
+            filterProducts(btn.dataset.filter, true);
         });
     });
+
+    /* Initialize filter to 'all' to ensure cards are visible on landing */
+    filterProducts("all", false);
 
     /* ══════════════════════════════
        INGREDIENTS TABS (3D FLIP)
@@ -380,7 +394,12 @@
         testPerView = getTestPerView();
         const maxIndex = Math.max(0, testCards.length - testPerView);
         testIndex = Math.min(index * testPerView, maxIndex);
-        const cardWidth = testCards[0].offsetWidth + 24; /* gap */
+        
+        /* Calculate gap dynamically from computed style */
+        const style = window.getComputedStyle(testTrack);
+        const gap = parseFloat(style.gap) || 0;
+        const cardWidth = testCards[0].offsetWidth + gap;
+
         gsap.to(testTrack, {
             x: -testIndex * cardWidth,
             duration: 0.6,
@@ -493,9 +512,11 @@
                 var dpr = Math.min(window.devicePixelRatio || 1, 2);
                 cw = cw / dpr; ch = ch / dpr;
                 var iw = img.naturalWidth, ih = img.naturalHeight;
-                var scale = Math.max(cw / iw, ch / ih);
+                /* On mobile, fill width. On desktop, cover-fit. */
+                var scale = actualIsMobile ? (cw / iw) : Math.max(cw / iw, ch / ih);
                 var dw = iw * scale, dh = ih * scale;
                 var dx = (cw - dw) / 2, dy = (ch - dh) / 2;
+                ctx.clearRect(0, 0, cw, ch);
                 ctx.drawImage(img, dx, dy, dw, dh);
                 currentFrame = index;
             }
@@ -736,11 +757,7 @@
         });
 
         /* Product cards stagger */
-        gsap.from(".product-card", {
-            y: 60, opacity: 0, duration: 0.7,
-            stagger: 0.1, ease: "power3.out",
-            scrollTrigger: { trigger: ".products-grid", start: "top 90%", once: true },
-        });
+        /* Removed problematic product-card stagger that caused hidden cards on some devices */
 
         /* Ingredient explorer reveal */
         gsap.from(".ing-explorer", {
@@ -1078,12 +1095,9 @@
     /* ══════════════════════════════
        KEYBOARD ESC CLOSE
        ══════════════════════════════ */
-    document.addEventListener("keydown", e => {
-        if (e.key === "Escape") {
-            closeCart();
-            closeQuickView();
-            if (navSidebar.classList.contains("open")) toggleSidebar();
-        }
+    /* Final ScrollTrigger Sync after all assets load */
+    window.addEventListener("load", () => {
+        ScrollTrigger.refresh();
     });
 
 })();

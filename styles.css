@@ -599,6 +599,8 @@ body.on-hero .cart-btn { color: #F2E2CD; }
 .hero-frames-wrap {
     position: absolute; inset: 0; z-index: 1;
     overflow: hidden;
+    /* Legacy dark brown matching tea tones for letterboxing */
+    background: #0a0502; 
 }
 .hero-canvas {
     width: 100%; height: 100%;
@@ -607,8 +609,13 @@ body.on-hero .cart-btn { color: #F2E2CD; }
 }
 .hero-frames-overlay {
     position: absolute; inset: 0;
-    background: linear-gradient(180deg, transparent 60%, rgba(92,55,28,0.25) 85%, var(--bg) 100%);
+    background: linear-gradient(180deg, transparent 60%, rgba(10,5,2,0.4) 85%, var(--bg) 100%);
     pointer-events: none;
+}
+@media (max-width: 768px) {
+    .hero-frames-overlay {
+        background: linear-gradient(180deg, rgba(10,5,2,0.2) 0%, transparent 20%, transparent 80%, var(--bg) 100%);
+    }
 }
 
 /* Scroll hint */
@@ -1113,6 +1120,10 @@ body.on-hero .cart-btn { color: #F2E2CD; }
     display: flex; gap: 1.5rem;
     transition: transform 0.6s var(--ease-out);
     padding: 1rem 0;
+    will-change: transform;
+}
+@media (max-width: 768px) {
+    .testimonial-track { gap: 0; }
 }
 .testimonial-card {
     min-width: calc(33.333% - 1rem); flex-shrink: 0;
@@ -1455,8 +1466,24 @@ body.on-hero .cart-btn { color: #F2E2CD; }
     .modal-grid { grid-template-columns: 1fr; }
     .modal-image { max-height: 250px; }
     .ing-explorer { grid-template-columns: 1fr; }
-    .ing-tabs { flex-direction: row; overflow-x: auto; gap: 0.5rem; padding-bottom: 0.5rem; }
-    .ing-tab { white-space: nowrap; }
+    .ing-tabs { 
+        display: flex; flex-direction: row; 
+        overflow-x: auto; gap: 0.5rem; 
+        padding: 0.5rem 0.5rem 1rem;
+        -webkit-overflow-scrolling: touch;
+        scrollbar-width: none;
+    }
+    .ing-tabs::-webkit-scrollbar { display: none; }
+    .ing-tab { white-space: nowrap; flex-shrink: 0; }
+@media (max-width: 480px) {
+    .ing-tabs { 
+        display: grid; grid-template-columns: 1fr 1fr; 
+        overflow-x: visible; gap: 0.5rem; 
+        padding: 0;
+    }
+    .ing-tab { padding: 0.8rem 1rem; font-size: 0.75rem; justify-content: center; }
+    .ing-tab-num { display: none; }
+}
     .contact-grid { grid-template-columns: 1fr 1fr; gap: 2rem; }
     .sec-about, .sec-shop, .sec-ingredients, .sec-faq { padding: 5rem 0; }
     .sec-testimonials { padding: 5rem 0; }
@@ -1552,8 +1579,28 @@ body.on-hero .cart-btn { color: #F2E2CD; }
     .ing-meta { grid-template-columns: 1fr 1fr; gap: 0.75rem; }
 
     /* ── Testimonials ── */
-    .testimonial-card { min-width: calc(100% - 0rem); padding: 1.5rem; }
-    .testimonial-quote { font-size: 0.85rem; }
+    .testimonial-card { 
+        min-width: 100% !important; 
+        width: 100% !important; 
+        padding: 2.5rem 1.5rem !important; 
+        box-sizing: border-box !important;
+        display: block !important;
+        overflow: visible !important;
+        height: auto !important;
+    }
+    .testimonial-quote { 
+        font-size: 1rem !important; 
+        line-height: 1.6 !important; 
+        white-space: normal !important; /* FORCE line-below-line wrapping */
+        display: block !important; 
+        width: 100% !important;
+        max-width: 100% !important;
+        margin: 0 0 2rem 0 !important;
+        word-break: break-word !important;
+        overflow-wrap: break-word !important;
+        text-align: left !important;
+        overflow: visible !important;
+    }
     .test-arrow { width: 38px; height: 38px; }
 
     /* ── FAQ ── */
